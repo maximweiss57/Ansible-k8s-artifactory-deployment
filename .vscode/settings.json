@@ -1,9 +1,0 @@
-{
-    "ansible.python.interpreterPath": "c:\\Users\\maxim\\OneDrive\\Desktop\\DevOps\\portfolio\\Ansible-k8s+artifactory\\.venv\\Scripts\\python.exe",
-    "yaml.schemas": {
-        "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json#/$defs/tasks": "file:///c%3A/Users/maxim/OneDrive/Desktop/DevOps/portfolio/Ansible-k8s%2Bartifactory/setup.yaml",
-        "https://raw.githubusercontent.com/dcermak/vscode-rke-cluster-config/main/schemas/cluster.yml.json": "file:///c%3A/Users/maxim/OneDrive/Desktop/DevOps/portfolio/Ansible-k8s%2Bartifactory/cluster.yaml",
-        "https://json.schemastore.org/yamllint.json": "file:///c%3A/Users/maxim/OneDrive/Desktop/DevOps/portfolio/Ansible-k8s%2Bartifactory/kind-cluster.yaml",
-        "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible-lint-config.json": "file:///c%3A/Users/maxim/OneDrive/Desktop/DevOps/portfolio/Ansible-k8s%2Bartifactory/ansible/setup.yaml"
-    }
-}
