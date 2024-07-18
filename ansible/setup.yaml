@@ -5,36 +5,62 @@
   tasks:
 
     - name: Uninstall old Docker versions
-      ansible.builtin.shell: |
-        dnf remove -y docker \
-        docker-client \
-        docker-client-latest \
-        docker-common \
-        docker-latest \
-        docker-latest-logrotate \
-        docker-logrotate \
-        docker-selinux \
-        docker-engine-selinux \
-        docker-engine
+      ansible.builtin.yum:
+        name:
+          - docker
+          - docker-client
+          - docker-client-latest
+          - docker-common
+          - docker-latest
+          - docker-latest-logrotate
+          - docker-logrotate
+          - docker-selinux
+          - docker-engine-selinux
+          - docker-engine
+        state: absent
 
-    - name: Install, start & enable Docker
-      ansible.builtin.shell: |
-        dnf -y install dnf-plugins-core
-        dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
-        dnf install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-        systemctl start docker
-        systemctl enable docker
+    - name: Install required packages for Docker
+      ansible.builtin.yum:
+        name: dnf-plugins-core
+        state: present
+
+    - name: Add Docker CE repository
+      ansible.builtin.yum_repository:
+        name: docker-ce
+        description: Docker CE Stable - $basearch
+        baseurl: https://download.docker.com/linux/fedora/docker-ce.repo
+        enabled: yes
+        gpgcheck: yes
+        gpgkey: https://download.docker.com/linux/fedora/gpg
+
+    - name: Install Docker CE
+      ansible.builtin.yum:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+
+    - name: Start and enable Docker service
+      ansible.builtin.systemd:
+        name: docker
+        enabled: yes
+        state: started
 
     - name: Install KinD
-      ansible.builtin.shell: |
-        curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.23.0/kind-linux-amd64
-        chmod +x ./kind
-        mv ./kind /usr/local/bin/kind
+      ansible.builtin.get_url:
+        url: https://kind.sigs.k8s.io/dl/v0.23.0/kind-linux-amd64
+        dest: /usr/local/bin/kind
+        mode: '0755'
 
-    - name: Download kubectl
+    - name: Download and install kubectl
       ansible.builtin.shell: |
         curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
         install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+      args:
+        creates: /usr/local/bin/kubectl
 
     - name: Install Helm
       ansible.builtin.package:
@@ -43,12 +69,14 @@
 
     - name: Copy kind-cluster.yaml to remote host
       ansible.builtin.copy:
-        src: ansible\kubernetes\kind-cluster.yaml
-        dest: ./kind-cluster.yaml
+        src: ansible/kubernetes/kind-cluster.yaml
+        dest: /root/ansible-proj/kind-cluster.yaml
         owner: root
         group: root
         mode: '0644'
 
     - name: Create KinD Cluster
       ansible.builtin.shell: |
-        kind create cluster --name Project-KinD --config /path/to/remote/ansible/kubernetes/kind-cluster.yaml
+        kind create cluster --name Project-KinD --config /root/kind-cluster.yaml
+      args:
+        creates: /root/.kube/config
